@@ -1,0 +1,60 @@
+apiVersion: triggers.tekton.dev/v1beta1 
+kind: TriggerTemplate
+metadata:
+  name: trigger-rd-pipeline-template
+spec:
+  params:
+    - name: gitrevision
+      description: The git revision
+      default: main
+    - name: gitrepositoryurl
+      description: The git repository url
+    - name: namespace
+      description: The namespace to create the resources
+      default: cicd
+    - name: projectname
+      description: The project name
+    - name: imagetag
+      description: The image tag
+      default: latest
+  resourcetemplates:
+    - apiVersion: tekton.dev/v1
+      kind: PipelineRun
+      metadata:
+        name: rd-pipeline-run-$(uid)
+        namespace: cicd 
+      spec:
+        params: 
+        - name: revision
+          value: main
+        - name: git_url
+          value: $(tt.params.gitrepositoryurl)
+        - name: imageUrl
+          value: 192.168.0.145:8081/cicd/$(tt.params.projectname)
+        - name: imageTag
+          value: latest
+        - name: pathToDockerfile
+          value: Dockerfile
+        - name: git_username
+          value: root
+        - name: git_password
+          value: Lw1994100713..
+        - name: app_name
+          value: hello-world
+        - name: namespace
+          value: cicd
+        pipelineRef:
+          name: rd-argocd-pipeline
+        workspaces:
+        - name: rd-repo-pvc
+          persistentVolumeClaim:
+            claimName: shared-data-pvc-1
+        - name: docker-config
+          secret:
+            secretName: docker-config
+        - name: git-credentials
+          secret:
+            secretName: git-credentials
+        - name: kubernetes-config
+          secret:
+            secretName: kubernetes-config

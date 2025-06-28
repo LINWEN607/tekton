@@ -1,0 +1,14 @@
+apiVersion: triggers.tekton.dev/v1beta1 
+kind: TriggerBinding
+metadata:
+  name: trigger-rd-pipeline-bingding
+spec:
+  params:
+    - name: gitrevision
+      value: $(body.ref)
+    - name: namespace
+      value: cicd
+    - name: gitrepositoryurl
+      value: $(body.project.git_ssh_url)
+    - name: projectname
+      value: $(body.project.name)

@@ -1,0 +1,83 @@
+apiVersion: tekton.dev/v1beta1
+kind: Pipeline
+metadata:
+  name: devops-hello-world-pipeline
+spec:
+  workspaces: # 声明 workspaces
+    - name: go-repo-pvc
+    - name: docker-config
+    - name: kubernetes-config
+  params:
+    # 定义代码仓库
+    - name: git_url
+    - name: revision
+      type: string
+      default: "master"
+    - name: gitInitImage
+      type: string
+      default: "registry.cn-hangzhou.aliyuncs.com/coolops/tekton-git-init:v0.29"
+    # 定义镜像参数
+    - name: pathToDockerfile
+      description: The path to the build context, used by Kaniko - within the workspace
+      default: .
+    - name: imageUrl
+      description: Url of image repository
+    - name: imageTag
+      description: Tag to apply to the built image
+      default: latest
+  tasks: # 添加task到流水线中
+    - name: clone
+      taskRef:
+        name: git-clone
+      workspaces:
+        - name: output
+          workspace: go-repo-pvc
+      params:
+        - name: url
+          value: $(params.git_url)
+        - name: revision
+          value: $(params.revision)
+        - name: gitInitImage
+          value: $(params.gitInitImage)
+    - name: unit-test
+      workspaces: # 传递 workspaces
+        - name: source
+          workspace: go-repo-pvc
+      taskRef:
+        name: unit-test
+      runAfter:
+        - clone
+    - name: build-push-image
+      params:
+        - name: pathToDockerfile
+          value: $(params.pathToDockerfile)
+        - name: imageUrl
+          value: $(params.imageUrl)
+        - name: imageTag
+          value: $(tasks.clone.results.commit)
+      taskRef:
+        name: build-push-image
+      runAfter:
+        - unit-test
+      workspaces: # 传递 workspaces
+        - name: source
+          workspace: go-repo-pvc
+        - name: dockerconfig
+          workspace: docker-config
+    - name: deploy-to-k8s
+      taskRef:
+        name: deploy-to-k8s
+      params:
+        - name: pathToYamlFile
+          value: deployment.yaml
+        - name: IMAGE
+          value: $(params.imageUrl)
+        - name: TAG
+          value: $(tasks.clone.results.commit)
+      workspaces:
+        - name: source
+          workspace: go-repo-pvc
+        - name: kubernetesconfig
+          workspace: kubernetes-config
+      runAfter:
+        - build-push-image

@@ -1,0 +1,28 @@
+apiVersion: tekton.dev/v1
+kind: Task
+metadata:
+  name: build-push-image
+spec:
+  params:
+    - name: pathToDockerfile
+      description: The path to the dockerfile to build (relative to the context)
+      default: Dockerfile
+    - name: imageUrl
+      description: Url of image repository
+    - name: imageTag
+      description: Tag to apply to the built image
+      default: latest
+  workspaces:
+    - name: source
+    - name: dockerconfig
+      mountPath: /kaniko/.docker # config.json 的挂载目录
+  steps:
+    - name: build-and-push
+      image: registry.cn-hangzhou.aliyuncs.com/coolops/kaniko-executor:v1.5.0
+      workingDir: $(workspaces.source.path)
+      command:
+        - /kaniko/executor
+      args:
+        - --dockerfile=$(params.pathToDockerfile)
+        - --destination=$(params.imageUrl):$(params.imageTag)
+        - --context=$(workspaces.source.path)

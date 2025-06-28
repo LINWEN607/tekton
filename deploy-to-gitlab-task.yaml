@@ -1,0 +1,66 @@
+apiVersion: tekton.dev/v1
+kind: Task
+metadata:
+  name: deploy-to-gitlab
+spec:
+  workspaces:
+    - name: source
+  params:
+    - name: IMAGE
+    - name: TAG
+    - name: GIT_USERNAME
+    - name: GIT_PASSWORD
+    - name: CHART_GITLAB_URL
+    - name: GIT_NAME
+      default: joker
+    - name: GIT_EMAIL
+      default: coolops@163.com
+    - name: CHART_DIR
+
+  steps:
+    - name: run-change-helm-chart
+      image: registry.cn-hangzhou.aliyuncs.com/coolops/helm-kubectl-curl-git-jq-yq:latest
+      workingDir: $(workspaces.source.path)
+      script: |
+        # 设置远程仓库 URL
+        git remote set-url origin http://$(params.GIT_USERNAME):$(params.GIT_PASSWORD)@$(params.CHART_GITLAB_URL)
+
+        # 配置 Git 用户信息
+        git config --global user.name "$(params.GIT_NAME)"
+        git config --global user.email "$(params.GIT_EMAIL)"
+
+        # 克隆仓库到默认目录（通常是仓库名）
+        git clone http://$(params.GIT_USERNAME):$(params.GIT_PASSWORD)@$(params.CHART_GITLAB_URL) helm
+
+        # 如果 CHART_DIR 参数为空，则表示目标是仓库的根目录
+        if [ -z "$(params.CHART_DIR)" ]; then
+          cd helm
+        else
+          # 否则切换到指定的子目录
+          CHART_DIR_PATH="helm/$(params.CHART_DIR)"
+          if [ ! -d "$CHART_DIR_PATH" ]; then
+            echo "Directory $CHART_DIR_PATH does not exist."
+            exit 1  # 如果目录不存在，退出脚本以避免后续错误
+          fi
+          cd "$CHART_DIR_PATH"
+        fi
+
+        # 确保当前在正确的分支上（假设主分支为 'main'，可以根据实际情况调整）
+        BRANCH="main"
+        if git rev-parse --verify "$BRANCH" &>/dev/null; then
+          echo "Branch $BRANCH already exists, checking it out..."
+          git checkout "$BRANCH"
+        else
+          echo "Branch $BRANCH does not exist, fetching and checking it out..."
+          git fetch origin "$BRANCH"
+          git checkout -b "$BRANCH" "origin/$BRANCH"
+        fi
+
+        # 更新 values.yaml 文件
+        yq w --inplace values.yaml 'image.repository' "$(params.IMAGE)"
+        yq w --inplace values.yaml 'image.tag' "$(params.TAG)"
+
+        # 提交更改
+        git add values.yaml
+        git commit -m 'image update' || true  # 如果没有变更，commit 会失败，这里忽略错误
+        git push origin "$BRANCH"

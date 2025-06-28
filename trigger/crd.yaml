@@ -1,0 +1,85 @@
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    operator.tekton.dev/last-applied-hash: dd0e144974413769b37f4ce53b79f9cdbe4d8c0a7b11b07bb59f0d6ca0fa8110
+  creationTimestamp: "2025-02-09T02:27:04Z"
+  generation: 1
+  labels:
+    app.kubernetes.io/instance: default
+    app.kubernetes.io/part-of: tekton-pipelines
+    operator.tekton.dev/operand-name: tektoncd-pipelines
+    pipeline.tekton.dev/release: v0.65.5
+    version: v0.65.5
+  name: stepactions.tekton.dev
+  ownerReferences:
+  - apiVersion: operator.tekton.dev/v1alpha1
+    blockOwnerDeletion: true
+    controller: true
+    kind: TektonPipeline
+    name: pipeline
+    uid: 5eb58464-1a32-4ec8-876a-52f15953f734
+  resourceVersion: "15568017"
+  uid: 2ee1a229-adb1-4767-9c75-532959d2958a
+spec:
+  conversion:
+    strategy: Webhook
+    webhook:
+      clientConfig:
+        service:
+          namespace: tekton-pipelines
+          name: tekton-pipelines-webhook
+          path: /convert
+        caBundle: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSURCVENDQWUyZ0F3SUJBZ0lJSWdVTG0xS1h4WG93RFFZSktvWklodmNOQVFFTEJRQXdGVEVUTUJFR0ExVUUKQXhNS2EzVmlaWEp1WlhSbGN6QWVGdzB5TkRFeU1qZ3hORE0wTWpsYUZ3MHpOREV5TWpZeE5ETTVNamxhTUJVeApFekFSQmdOVkJBTVRDbXQxWW1WeWJtVjBaWE13Z2dFaU1BMEdDU3FHU0liM0RRRUJBUVVBQTRJQkR3QXdnZ0VLCkFvSUJBUUR2QUFydldZMVZwM0JwTlNxSTNLNDdIbUpXaGF1U1JNM3pKMUplMnEvSkdxNUpMNWxxNnhxNFNHZHkKZ0ZyaEZMZmVVbUowVTNkS3N5a1JYMUtlaUg4NGE1d0o1WWNzSG9KQ2ZNTHhmOThlbGFxQWJQbmRLMElyWXNRVwpTNi9CdHNYTTVVVG0ycEgwWStmVVNKN09Db28vcnBDUFJPVXJDUElMeFhCZWtDQUMyYnNWbTJFSnpFYTdCMkhrCmR6SGl4MzVUWlFma1JjTFRJQk5YODBEdHUxTW4vV3hpNVB4MTQ2K01YOUw5UW14VHd0VHdKb29SN3V4WFFEQ0EKcEZKWS9uWnpaOTJWVFVLZENQb3ZVNUYzY3F6cXViUnpzWWdIQ1RFZkZtdG5FVzlOS2d0cnFOZVFmalY3MWZSdAppdERQVDhvclM5U2tKbm1YZDBDSUF0TTNhK0pOQWdNQkFBR2pXVEJYTUE0R0ExVWREd0VCL3dRRUF3SUNwREFQCkJnTlZIUk1CQWY4RUJUQURBUUgvTUIwR0ExVWREZ1FXQkJROVlpQW91V0dZKzRMS1U3VmJ1NnBKVnRZWHB6QVYKQmdOVkhSRUVEakFNZ2dwcmRXSmxjbTVsZEdWek1BMEdDU3FHU0liM0RRRUJDd1VBQTRJQkFRQkNHcnJDaktRYgp4dnpDNUxGKzFyOHg0clB1RXdNcmRTQlNmWkZDR1FxbG8wRXZOTlZVS01OSWNXMmpFRkphcEVCOTB2MTBxMjloClZpYkZmUmFiK25PcFMrcUdDRzNFSU56M1dTaC9raDVPTi9Mamo5T3lSZ3NXUFJPMGswZnNJY1NRY1pCM3p5dVYKQ1ZHNzFjYzFaVG9XNmxFenlBUFNydldiUXZJOTF5ZzVHT1pvUUNTbmoveHVnaExLSGVSL3I2R3RPQjR1QjhjdwpQNUZYbExDWGE4TmIwR3FsdWlhVVJnNjRCYmFsZXdMN1JxVVZzQzBKaTE4dTA3ajBBTTFSeXlnNldqdEE3T0tCCk51dm1PQXlIUk85SXdZWVZxY25CUTM1dW5rbnllU2VpMG1IelR4aGFzckFMNVFqZ2c4L3JpbnJ4N2dCRk40VjMKTkJNbHpYWWpsN095Ci0tLS0tRU5EIENFUlRJRklDQVRFLS0tLS0K  # 替换为您的 CA 证书的 Base64 编码
+      conversionReviewVersions: ["v1", "v1beta1"]
+  group: tekton.dev
+  names:
+    categories:
+    - tekton
+    - tekton-pipelines
+    kind: StepAction
+    listKind: StepActionList
+    plural: stepactions
+    singular: stepaction
+  scope: Namespaced
+  versions:
+  - name: v1alpha1
+    schema:
+      openAPIV3Schema:
+        type: object
+        x-kubernetes-preserve-unknown-fields: true
+    served: true
+    storage: false
+    subresources:
+      status: {}
+  - name: v1beta1
+    schema:
+      openAPIV3Schema:
+        type: object
+        x-kubernetes-preserve-unknown-fields: true
+    served: true
+    storage: true
+    subresources:
+      status: {}
+status:
+  acceptedNames:
+    categories:
+    - tekton
+    - tekton-pipelines
+    kind: StepAction
+    listKind: StepActionList
+    plural: stepactions
+    singular: stepaction
+  conditions:
+  - lastTransitionTime: "2025-02-09T02:27:04Z"
+    message: no conflicts found
+    reason: NoConflicts
+    status: "True"
+    type: NamesAccepted
+  - lastTransitionTime: "2025-02-09T02:27:09Z"
+    message: the initial names have been accepted
+    reason: InitialNamesAccepted
+    status: "True"
+    type: Established
+  storedVersions:
+  - v1beta1

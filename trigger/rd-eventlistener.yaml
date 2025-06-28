@@ -1,0 +1,11 @@
+apiVersion: triggers.tekton.dev/v1beta1
+kind: EventListener
+metadata:
+  name: trigger-rd-pipeline-eventlistener
+spec:
+  serviceAccountName: tekton-triggers-gitlab-sa 
+  triggers:
+    - bindings:
+        - ref: trigger-rd-pipeline-bingding
+      template:
+        ref: trigger-rd-pipeline-template

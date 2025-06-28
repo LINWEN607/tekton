@@ -1,0 +1,39 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: tekton-triggers-gitlab-sa
+  namespace: cicd
+secrets:
+- name: gitlab-secret
+- name: git-credentials
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: tekton-triggers-gitlab-minimal
+rules:
+  # Permissions for every EventListener deployment to function
+  - apiGroups: ["triggers.tekton.dev"]
+    resources: ["eventlisteners", "triggerbindings", "triggertemplates", "clustertriggerbindings", "clusterinterceptors", "triggers", "interceptors"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: [""]
+    # secrets are only needed for Github/Gitlab interceptors, serviceaccounts only for per trigger authorization
+    resources: ["configmaps", "secrets", "serviceaccounts"]
+    verbs: ["get", "list", "watch"]
+  # Permissions to create resources in associated TriggerTemplates
+  - apiGroups: ["tekton.dev"]
+    resources: ["pipelineruns", "pipelineresources", "taskruns"]
+    verbs: ["create"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: tekton-triggers-gitlab-binding
+subjects:
+  - kind: ServiceAccount
+    name: tekton-triggers-gitlab-sa
+    namespace: cicd
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: tekton-triggers-gitlab-minimal

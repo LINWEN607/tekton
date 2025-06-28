@@ -1,0 +1,113 @@
+apiVersion: tekton.dev/v1beta1
+kind: Pipeline
+metadata:
+  name: rd-argocd-pipeline
+spec:
+  workspaces: # 声明 workspaces
+    - name: rd-repo-pvc
+    - name: docker-config
+    - name: git-credentials
+  params:
+    # 定义代码仓库
+    - name: git_url
+    - name: revision
+      type: string
+      default: "main"
+    - name: gitInitImage
+      type: string
+      default: "registry.cn-hangzhou.aliyuncs.com/coolops/tekton-git-init:v0.29"
+    # 定义镜像参数
+    - name: pathToDockerfile
+      description: The path to the build context, used by Kaniko - within the workspace
+      default: .
+    - name: imageUrl
+      description: Url of image repository
+    - name: imageTag
+      description: Tag to apply to the built image
+      default: latest
+    - name: git_username
+      type: string
+      default: root
+    - name: git_password
+      type: string
+      default: Lw1994100713..
+    - name: chart_gitlab_url
+      type: string
+      default: 192.168.0.153:8090/lins/helm.git
+    - name: git_name
+      type: string
+      default: lins
+    - name: git_email
+      type: string
+      default: 1037231547@qq.com
+    - name: chart_dir
+      type: string
+      default: .
+    - name: app_name
+      type: string
+  tasks: # 添加task到流水线中
+    - name: clone
+      taskRef:
+        name: git-clone
+      workspaces:
+        - name: output
+          workspace: rd-repo-pvc
+        - name: ssh-directory
+          workspace: git-credentials
+      params:
+        - name: url
+          value: $(params.git_url)
+        - name: revision
+          value: $(params.revision)
+        - name: gitInitImage
+          value: $(params.gitInitImage)
+    - name: unit-test
+      workspaces: # 传递 workspaces
+        - name: source
+          workspace: rd-repo-pvc
+      taskRef:
+        name: unit-test
+      runAfter:
+        - clone
+    - name: build-push-image
+      params:
+        - name: pathToDockerfile
+          value: $(params.pathToDockerfile)
+        - name: imageUrl
+          value: $(params.imageUrl)
+        - name: imageTag
+          value: $(tasks.clone.results.commit)
+      taskRef:
+        name: build-push-image
+      runAfter:
+        - unit-test
+      workspaces: # 传递 workspaces
+        - name: source
+          workspace: rd-repo-pvc
+        - name: dockerconfig
+          workspace: docker-config
+    - name: deploy-to-gitlab
+      taskRef:
+        name: deploy-to-gitlab
+      params:
+        - name: IMAGE
+          value: $(params.imageUrl)
+        - name: TAG
+          value: $(tasks.clone.results.commit)
+        - name: GIT_USERNAME
+          value: $(params.git_username)
+        - name: GIT_PASSWORD
+          value: $(params.git_password)
+        - name: CHART_GITLAB_URL
+          value: $(params.chart_gitlab_url)
+        - name: GIT_NAME
+          value: $(params.git_name)
+        - name: GIT_EMAIL
+          value: $(params.git_email)
+        - name: CHART_DIR
+          value: $(params.chart_dir)
+      workspaces:
+        - name: source
+          workspace: rd-repo-pvc
+      runAfter:
+        - build-push-image
