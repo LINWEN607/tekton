@@ -12,3 +12,5 @@ spec:
       value: $(body.project.git_ssh_url)
     - name: projectname
       value: $(body.project.name)
+    - name: helmHeader
+      value: $(header.Helm)
