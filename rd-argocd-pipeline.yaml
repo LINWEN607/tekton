@@ -109,5 +109,7 @@ spec:
       workspaces:
         - name: source
           workspace: rd-repo-pvc
+        - name: ssh-directory
+          workspace: git-credentials
       runAfter:
         - build-push-image
