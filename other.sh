@@ -11,6 +11,11 @@ kubectl create secret generic git-credentials -n cicd  --from-file=id_rsa=~/.ssh
 
 
 
+#gitlab传入secret
+kubectl create secret generic gitlab-secret  --from-literal=secretToken=123456 -n cicd
+
+
+
 
 
 
