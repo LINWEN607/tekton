@@ -1,4 +1,4 @@
-apiVersion: triggers.tekton.dev/v1beta1 
+apiVersion: triggers.tekton.dev/v1beta1
 kind: TriggerTemplate
 metadata:
   name: trigger-rd-pipeline-template
@@ -17,14 +17,17 @@ spec:
     - name: imagetag
       description: The image tag
       default: latest
+    - name: helmHeader
+      description: Helm header from request
+      default: ""  # 可选：设置默认值，防止空值出错
   resourcetemplates:
     - apiVersion: tekton.dev/v1
       kind: PipelineRun
       metadata:
         name: rd-pipeline-run-$(uid)
-        namespace: cicd 
+        namespace: cicd
       spec:
-        params: 
+        params:
         - name: revision
           value: main
         - name: git_url
@@ -39,6 +42,8 @@ spec:
           value: root
         - name: git_password
           value: Lw1994100713..
+        - name: helmHeader
+          value: $(tt.params.helmHeader)
         - name: app_name
           value: hello-world
         - name: namespace
