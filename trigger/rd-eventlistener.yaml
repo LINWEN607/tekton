@@ -19,6 +19,14 @@ spec:
             - name: eventTypes
               value:
                 - "Push Hook"
+        - name: "filter-main-branch"
+          ref:
+            name: "cel"
+            kind: ClusterInterceptor
+          params:
+            - name: filter
+              value: >
+                  body.ref == "refs/heads/main"
       bindings:
         - ref: trigger-rd-pipeline-bingding
       template:
