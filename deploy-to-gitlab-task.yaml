@@ -39,12 +39,16 @@ spec:
         # 配置 Git 用户信息
         git config --global user.name "$(params.GIT_NAME)"
         git config --global user.email "$(params.GIT_EMAIL)"
-
+        echo "Current directory after clone:"
+        pwd
+        ls -la
         # 克隆仓库到默认目录（通常是仓库名）
         git clone $(params.CHART_GITLAB_URL) helm
-
+        echo "Current directory after cd helm:"
+        pwd
+        ls -la
         # 如果 CHART_DIR 参数为空，则表示目标是仓库的根目录
-        if [ -z "$(params.CHART_DIR)" ]; then
+        if [ "$(params.CHART_DIR)" = "." ]; then
           cd helm
         else
           # 否则切换到指定的子目录
