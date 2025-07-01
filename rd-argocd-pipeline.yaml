@@ -31,9 +31,6 @@ spec:
     - name: git_password
       type: string
       default: Lw1994100713..
-    - name: chart_gitlab_url
-      type: string
-      default: 192.168.0.153:8090/lins/helm.git
     - name: git_name
       type: string
       default: lins
@@ -45,6 +42,9 @@ spec:
       default: .
     - name: app_name
       type: string
+    - name: helmHeader
+      type: string
+      description: Helm header value from request
   tasks: # 添加task到流水线中
     - name: clone
       taskRef:
@@ -98,12 +98,12 @@ spec:
           value: $(params.git_username)
         - name: GIT_PASSWORD
           value: $(params.git_password)
-        - name: CHART_GITLAB_URL
-          value: $(params.chart_gitlab_url)
         - name: GIT_NAME
           value: $(params.git_name)
         - name: GIT_EMAIL
           value: $(params.git_email)
+        - name: CHART_GITLAB_URL   # ← Pipeline 中期望的大写常量名
+          value: $(tt.params.helmHeader)
         - name: CHART_DIR
           value: $(params.chart_dir)
       workspaces:
