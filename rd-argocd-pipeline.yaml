@@ -103,7 +103,7 @@ spec:
         - name: GIT_EMAIL
           value: $(params.git_email)
         - name: CHART_GITLAB_URL   # ← Pipeline 中期望的大写常量名
-          value: $(tt.params.helmHeader)
+          value: $(params.helmHeader)
         - name: CHART_DIR
           value: $(params.chart_dir)
       workspaces:
